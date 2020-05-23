@@ -1,0 +1,35 @@
+name: Build/release
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.101
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      - name: Package
+        run: |
+          dotnet publish --framework net40 -p:PublishProfile=Properties/PublishProfiles/net40.pubxml
+          dotnet publish --framework netcoreapp3.1 -p:PublishProfile=Properties/PublishProfiles/netcoreapp3.1.pubxml
+      - name: Upload the package built on net40 framework
+        uses: actions/upload-artifact@v2
+        with:
+          name: net40
+          path: InjectedEComRepair/publish/net40
+      - name: Upload the package built on netcoreapp3.1 framework
+        uses: actions/upload-artifact@v2
+        with:
+          name: netcoreapp3.1
+          path: InjectedEComRepair/publish/netcoreapp3.1

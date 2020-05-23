@@ -1,0 +1,71 @@
+﻿<Window x:Class="InjectedEComRepair.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:InjectedEComRepair"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="600" Width="800">
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Bottom">
+            <GroupBox Header="开发与调试" DockPanel.Dock="Left">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="OutputSessionDataCheckBox" Margin="5,0" VerticalContentAlignment="Center">
+                        <StackPanel>
+                            <TextBlock Text="输出" />
+                            <TextBlock Text="段内" />
+                            <TextBlock Text="数据" />
+                        </StackPanel>
+                    </CheckBox>
+                    <CheckBox x:Name="ParseCodeDataCheckBox" Margin="5,0" VerticalContentAlignment="Center">
+                        <StackPanel>
+                            <TextBlock Text="调试" />
+                            <TextBlock Text="代码" />
+                            <TextBlock Text="解析" />
+                        </StackPanel>
+                    </CheckBox>
+                    <CheckBox x:Name="OutputTextCodeCheckBox" Margin="5,0" VerticalContentAlignment="Center" IsChecked="True">
+                        <StackPanel>
+                            <TextBlock Text="输出" />
+                            <TextBlock Text="文本" />
+                            <TextBlock Text="代码" />
+                        </StackPanel>
+                    </CheckBox>
+                    <Button x:Name="DebugButton" Margin="5" Click="DebugButton_Click">调试</Button>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Header="功能区" >
+                <DockPanel>
+                    <Grid DockPanel.Dock="Left">
+                        <UniformGrid Columns="1">
+                            <RadioButton x:Name="FixOffestRadioButton" VerticalAlignment="Center">修复偏移表</RadioButton>
+                            <RadioButton x:Name="FullyRewriteRadioButton" VerticalAlignment="Center" IsChecked="True">完整重写入</RadioButton>
+                        </UniformGrid>
+                    </Grid>
+                    <Label DockPanel.Dock="Bottom" HorizontalContentAlignment="Center"
+                           Padding="0,5,5,5" Margin="5,0,0,0"
+                           Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Foreground="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}">
+                        AD：【本工具官方】易语言高级编程QQ群605310933，欢迎加入
+                    </Label>
+                    <DockPanel Margin="0,0,0,5">
+                        <Label DockPanel.Dock="Left">输出文件：</Label>
+                        <Button x:Name="RepairButton" DockPanel.Dock="Right" IsDefault="{Binding ElementName=OutputFileTextBox, Path=IsFocused}" Click="RepairButton_Click">修复</Button>
+                        <TextBox x:Name="OutputFileTextBox" VerticalContentAlignment="Center">D:\修复后.e</TextBox>
+                    </DockPanel>
+                </DockPanel>
+            </GroupBox>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Bottom" MinHeight="25">
+            <Button x:Name="SelectFileButton" DockPanel.Dock="Right" Click="SelectFileButton_Click">...</Button>
+            <TextBox x:Name="InputFileTextBox" VerticalContentAlignment="Center">D:\1.e</TextBox>
+        </DockPanel>
+        <TextBox x:Name="OutputTextBox"
+                 IsReadOnly="True" 
+                 TextWrapping="Wrap" 
+                 AcceptsReturn="True"
+                 VerticalScrollBarVisibility="Visible"
+                 HorizontalScrollBarVisibility="Visible"
+                 Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
+                 Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"></TextBox>
+    </DockPanel>
+</Window>

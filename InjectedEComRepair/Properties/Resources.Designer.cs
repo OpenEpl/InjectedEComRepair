@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace InjectedEComRepairer.Properties {
+namespace InjectedEComRepair.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace InjectedEComRepairer.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("InjectedEComRepairer.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("InjectedEComRepair.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,6 +57,32 @@ namespace InjectedEComRepairer.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 感谢那些反对我们的人，是你们的讽刺让我们更加坚定
+        ///更感谢那些支持我们的人，是你们的鼓励让我们更具动力
+        ///我们始终相信：自由、开放、包容的世界
+        ///我们始终认为：任何人都有责任让互联网变得更加美好
+        ///Let&apos;s change world by coding!
+        ///----------------------------------------------------------------
+        ///开发背景：
+        ///无数次，为了快速实现某个原型产品，在网上搜索模块完成基础功能
+        ///但却无数次，碰到打包党放出的模块，在原版模块上放置各种恶意代码
+        ///这些打包党，无需辛苦编写模块，只需寻找热门模块，然后加入恶意代码
+        ///于是，盗取用户信息、强制安装推广软件，他们等着钱的到来，却从不劳动
+        ///终于，我忍无可忍
+        ///终于，我找到了方法来辨别模块是否具有恶意行为
+        ///怀着许多人可能有相同经历相同烦恼的想法
+        ///我放出了这款工具，以及源码
+        ///希望，尽我的微薄之力，可让大家免受打包党的侵害
+        ///----------------------------------------------------------------
+        ///仅用于对隐藏代码、易模块的手 [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string WelcomeText {
+            get {
+                return ResourceManager.GetString("WelcomeText", resourceCulture);
             }
         }
     }

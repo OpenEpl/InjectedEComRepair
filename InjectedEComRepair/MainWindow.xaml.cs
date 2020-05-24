@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -219,9 +220,31 @@ namespace InjectedEComRepair
             }).Start();
         }
 
-        private static string InputPassword(string tip)
+        private string InputPassword(string tips)
         {
-            return null;
+            return Dispatcher.Invoke(new Func<string>(() =>
+            {
+                var dialog = new InputPasswordDialog(tips);
+                if (dialog.ShowDialog().GetValueOrDefault())
+                {
+                    return dialog.Password;
+                }
+                return null;
+            })).ToString();
+        }
+
+        private void Window_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string fileName = ((Array)e.Data.GetData(DataFormats.FileDrop)).GetValue(0).ToString();
+                InputFileTextBox.Text = fileName;
+            }
+        }
+
+        private void OutputTextBox_PreviewDragOver(object sender, DragEventArgs e)
+        {
+            e.Handled = true;
         }
     }
 }

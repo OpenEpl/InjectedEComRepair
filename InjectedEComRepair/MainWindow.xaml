@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:InjectedEComRepair"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="800">
+        Title="MainWindow" Height="600" Width="800" AllowDrop="True" Drop="Window_Drop">
     <DockPanel>
         <DockPanel DockPanel.Dock="Bottom">
             <GroupBox Header="开发与调试" DockPanel.Dock="Left">
@@ -66,6 +66,7 @@
                  VerticalScrollBarVisibility="Visible"
                  HorizontalScrollBarVisibility="Visible"
                  Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
-                 Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"></TextBox>
+                 Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                 PreviewDragOver="OutputTextBox_PreviewDragOver"/>
     </DockPanel>
 </Window>

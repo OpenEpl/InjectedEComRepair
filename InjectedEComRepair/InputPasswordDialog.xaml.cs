@@ -18,7 +18,6 @@ namespace InjectedEComRepair
         public InputPasswordDialog(string tips = null)
         {
             InitializeComponent();
-            this.DialogResult = false;
             this.TipsTextBox.Text = string.IsNullOrWhiteSpace(tips) ? "[无]" : tips;
         }
 

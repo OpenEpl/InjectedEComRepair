@@ -21,13 +21,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
       - name: Package
         run: |
-          dotnet publish --configuration Release --framework net40 -p:PublishProfile=Properties/PublishProfiles/net40.pubxml
           dotnet publish --configuration Release --framework netcoreapp3.1 -p:PublishProfile=Properties/PublishProfiles/netcoreapp3.1.pubxml
-      - name: Upload the package built on net40 framework
-        uses: actions/upload-artifact@v2
-        with:
-          name: net40
-          path: InjectedEComRepair/publish/net40
       - name: Upload the package built on netcoreapp3.1 framework
         uses: actions/upload-artifact@v2
         with:

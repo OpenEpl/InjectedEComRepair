@@ -10,7 +10,7 @@
         <DockPanel DockPanel.Dock="Bottom">
             <GroupBox Header="开发与调试" DockPanel.Dock="Left">
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox x:Name="OutputSessionDataCheckBox" Margin="5,0" VerticalContentAlignment="Center">
+                    <CheckBox x:Name="OutputSectionDataCheckBox" Margin="5,0" VerticalContentAlignment="Center">
                         <StackPanel>
                             <TextBlock Text="输出" />
                             <TextBlock Text="段内" />

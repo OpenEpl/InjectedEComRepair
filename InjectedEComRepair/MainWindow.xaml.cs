@@ -1,4 +1,6 @@
-﻿using QIQI.EProjectFile;
+﻿using Newtonsoft.Json;
+using QIQI.EProjectFile;
+using QIQI.EProjectFile.Sections;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +26,7 @@ namespace InjectedEComRepair
             this.OutputTextBox.Text = Properties.Resources.WelcomeText;
             var guiVersionInfo = Attribute.GetCustomAttribute(typeof(MainWindow).Assembly, typeof(System.Reflection.AssemblyInformationalVersionAttribute))
                 as System.Reflection.AssemblyInformationalVersionAttribute;
-            var coreVersionInfo = Attribute.GetCustomAttribute(typeof(EProjectFile).Assembly, typeof(System.Reflection.AssemblyInformationalVersionAttribute))
+            var coreVersionInfo = Attribute.GetCustomAttribute(typeof(EplDocument).Assembly, typeof(System.Reflection.AssemblyInformationalVersionAttribute))
                 as System.Reflection.AssemblyInformationalVersionAttribute;
             this.Title = string.Format("易模块手工分析型病毒查杀工具 v{0} (Core: v{1})", guiVersionInfo?.InformationalVersion ?? "Unknown", coreVersionInfo?.InformationalVersion ?? "Unknown");
         }
@@ -43,7 +45,7 @@ namespace InjectedEComRepair
 
         private void DebugButton_Click(object sender, RoutedEventArgs e)
         {
-            bool outputSessionData = OutputSessionDataCheckBox.IsChecked.GetValueOrDefault();
+            bool outputSectionData = OutputSectionDataCheckBox.IsChecked.GetValueOrDefault();
             bool parseCodeData = ParseCodeDataCheckBox.IsChecked.GetValueOrDefault();
             bool outputTextCode = OutputTextCodeCheckBox.IsChecked.GetValueOrDefault();
             string fileName = InputFileTextBox.Text;
@@ -53,125 +55,58 @@ namespace InjectedEComRepair
             {
                 try
                 {
-                    CodeSectionInfo codeSectionInfo = null;
-                    ResourceSectionInfo resourceSectionInfo = null;
-                    LosableSectionInfo losableSectionInfo = null;
-                    Encoding encoding = Encoding.GetEncoding("gbk");
+                    var doc = new EplDocument();
                     var output = new StringBuilder();
-                    using (var projectFileReader = new ProjectFileReader(File.OpenRead(fileName), InputPassword))
+                    doc.Load(File.OpenRead(fileName), InputPassword);
+                    var encoding = doc.DetermineEncoding();
+                    var codeSection = doc.Get(CodeSection.Key);
+                    var resourceSection = doc.Get(ResourceSection.Key);
+                    if (outputSectionData)
                     {
-                        while (!projectFileReader.IsFinish)
+                        output.AppendLine(JsonConvert.SerializeObject(doc.Sections, Formatting.Indented));
+                    }
+                    if (parseCodeData)
+                    {
+                        output.AppendLine("<<<<<<<<<<<<<<<ParseTest>>>>>>>>>>>>>>>");
+                        foreach (var method in codeSection.Methods)
                         {
-                            var section = projectFileReader.ReadSection();
-                            if (outputSessionData)
+                            output.AppendLine($"###Method: {(string.IsNullOrEmpty(method.Name) ? "Unknown" : method.Name)}{$"Id: {method.Id})###"}");
+                            try
                             {
-                                output.AppendLine("---------------" + section.Name + "---------------");
-                                output.AppendLine("CanSkip: " + section.CanSkip.ToString());
-                                output.AppendLine("Key: 0x" + section.Key.ToString("X8"));
-                                output.Append("Data: ");
-                            }
-                            switch (section.Key)
-                            {
-                                case ESystemInfo.SectionKey:
-                                    {
-                                        var systemInfo = ESystemInfo.Parse(section.Data);
-                                        encoding = systemInfo.Encoding;
-                                        if (outputSessionData) output.AppendLine(systemInfo.ToString());
-                                    }
-                                    break;
-                                case ProjectConfigInfo.SectionKey:
-                                    {
-                                        var projectConfig = ProjectConfigInfo.Parse(section.Data, encoding);
-                                        if (outputSessionData) output.AppendLine(projectConfig.ToString());
-                                    }
-                                    break;
-                                case CodeSectionInfo.SectionKey:
-                                    codeSectionInfo = CodeSectionInfo.Parse(section.Data, encoding, projectFileReader.CryptEc);
-                                    if (outputSessionData) output.AppendLine(codeSectionInfo.ToString());
-                                    break;
-                                case EPackageInfo.SectionKey:
-                                    {
-                                        var packageInfo = EPackageInfo.Parse(section.Data, encoding);
-                                        if (outputSessionData) output.AppendLine(packageInfo.ToString());
-                                    }
-                                    break;
-                                case ResourceSectionInfo.SectionKey:
-                                    resourceSectionInfo = ResourceSectionInfo.Parse(section.Data, encoding);
-                                    if (outputSessionData) output.AppendLine(resourceSectionInfo.ToString());
-                                    break;
-
-                                case InitEcSectionInfo.SectionKey:
-                                    {
-                                        var initEcSectionInfo = InitEcSectionInfo.Parse(section.Data, encoding);
-                                        if (outputSessionData) output.AppendLine(initEcSectionInfo.ToString());
-                                    }
-                                    break;
-                                case LosableSectionInfo.SectionKey:
-                                    {
-                                        losableSectionInfo = LosableSectionInfo.Parse(section.Data, encoding);
-                                        if (outputSessionData) output.AppendLine(losableSectionInfo.ToString());
-                                    }
-                                    break;
-                                case FolderSectionInfo.SectionKey:
-                                    {
-                                        var folderSectionInfo = FolderSectionInfo.Parse(section.Data, encoding);
-                                        if (outputSessionData) output.AppendLine(folderSectionInfo.ToString());
-                                    }
-                                    break;
-                                default:
-                                    if (outputSessionData)
-                                    {
-                                        output.AppendLine("{");
-                                        output.Append("  \"Unknown\": \"");
-                                        output.Append(section.Data.ToHexString());
-                                        output.AppendLine("\"");
-                                        output.AppendLine("}");
-                                    }
-                                    break;
-                            }
-                        }
-                        if (parseCodeData)
-                        {
-                            output.AppendLine("<<<<<<<<<<<<<<<ParseTest>>>>>>>>>>>>>>>");
-                            foreach (var method in codeSectionInfo.Methods)
-                            {
-                                output.AppendLine($"###Method: {(string.IsNullOrEmpty(method.Name) ? "Unknown" : method.Name)}{$"Id: {method.Id})###"}");
-                                try
-                                {
 #pragma warning disable CS0612 // 类型或成员已过时
-                                    var block = CodeDataParser.ParseStatementBlock(method.CodeData.ExpressionData, encoding, out var lineOffest, out var blockOffest);
+                                var block = CodeDataParser.ParseStatementBlock(method.CodeData.ExpressionData, encoding, out var lineOffest, out var blockOffest);
 #pragma warning restore CS0612 // 类型或成员已过时
-                                    var GenCodeData = block.ToCodeData(encoding);
-                                    output.Append("Raw: ");
-                                    output.AppendLine(method.CodeData.ToString());
-                                    output.Append("FullRewrite: ");
-                                    output.AppendLine(GenCodeData.ToString());
-                                    output.Append("OldOffestRepairer: ");
-                                    output.AppendLine("{");
-                                    output.AppendLine("  \"LineOffest\": \"" + lineOffest.ToHexString() + "\"");
-                                    output.AppendLine("  \"BlockOffest\": \"" + blockOffest.ToHexString() + "\"");
-                                    output.AppendLine("}");
-                                }
-#pragma warning disable CA1031 // Do not catch general exception types
-                                catch (Exception exception)
-                                {
-                                    output.AppendLine("出现错误：");
-                                    output.AppendLine(exception.ToString());
-                                    output.AppendLine();
-                                }
-#pragma warning restore CA1031 // Do not catch general exception types
+                                var GenCodeData = block.ToCodeData(encoding);
+                                output.Append("Raw: ");
+                                output.AppendLine(method.CodeData.ToString());
+                                output.Append("FullRewrite: ");
+                                output.AppendLine(GenCodeData.ToString());
+                                output.Append("OldOffestRepairer: ");
+                                output.AppendLine("{");
+                                output.AppendLine("  \"LineOffest\": \"" + lineOffest.ToHexString() + "\"");
+                                output.AppendLine("  \"BlockOffest\": \"" + blockOffest.ToHexString() + "\"");
+                                output.AppendLine("}");
                             }
-                        }
-                        if (outputTextCode)
-                        {
-                            output.AppendLine("<<<<<<<<<<<<<<<TextCode>>>>>>>>>>>>>>>");
-                            var nameMap = new IdToNameMap(codeSectionInfo, resourceSectionInfo, losableSectionInfo);
-                            output.AppendLine(".版本 2");
-                            output.AppendLine();
-                            output.AppendLine(codeSectionInfo.ToTextCode(nameMap));
-                            output.AppendLine(resourceSectionInfo.ToTextCode(nameMap));
+#pragma warning disable CA1031 // Do not catch general exception types
+                            catch (Exception exception)
+                            {
+                                output.AppendLine("出现错误：");
+                                output.AppendLine(exception.ToString());
+                                output.AppendLine();
+                            }
+#pragma warning restore CA1031 // Do not catch general exception types
                         }
                     }
+                    if (outputTextCode)
+                    {
+                        output.AppendLine("<<<<<<<<<<<<<<<TextCode>>>>>>>>>>>>>>>");
+                        var nameMap = new IdToNameMap(doc);
+                        output.AppendLine(".版本 2");
+                        output.AppendLine();
+                        output.AppendLine(codeSection.ToTextCode(nameMap));
+                        output.AppendLine(resourceSection.ToTextCode(nameMap));
+                    }
+                    
                     Dispatcher.Invoke(new Action(() =>
                     {
                         OutputTextBox.Text = output.ToString();

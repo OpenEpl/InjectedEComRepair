@@ -1,4 +1,5 @@
 ﻿using QIQI.EProjectFile;
+using QIQI.EProjectFile.Sections;
 using QIQI.EProjectFile.Statements;
 using System;
 using System.Collections.Generic;
@@ -13,13 +14,18 @@ namespace InjectedEComRepair
     {
         public static void RepairEProjectFile(Stream source, Stream target, ProjectFileReader.OnInputPassword inputPassword = null, int engine = 0)
         {
-            var file = new EProjectFile();
-            file.Load(source, inputPassword);
-            var libNameMap = new IdToNameMap(file.Code.Libraries);
-            var classIdMap = file.Code.Classes.ToDictionary(x => x.Id);
-            var methodIdMap = file.Code.Methods.ToDictionary(x => x.Id);
-            file.ESystemInfo.FileType = 1;
-            foreach (var classInfo in file.Code.Classes)
+            var doc = new EplDocument();
+            doc.Load(source, inputPassword);
+            var encoding = doc.DetermineEncoding();
+            var code = doc.Get(CodeSection.Key);
+            var resource = doc.Get(ResourceSection.Key);
+            var initECSection = doc.Get(InitECSection.Key);
+            var eSystemInfo = doc.Get(ESystemInfoSection.Key);
+            var libNameMap = new IdToNameMap(code.Libraries);
+            var classIdMap = code.Classes.ToDictionary(x => x.Id);
+            var methodIdMap = code.Methods.ToDictionary(x => x.Id);
+            eSystemInfo.FileType = 1;
+            foreach (var classInfo in code.Classes)
             {
                 if (!ValidEplName(classInfo.Name))
                 {
@@ -30,7 +36,7 @@ namespace InjectedEComRepair
                         {
                             classInfo.Comment = "";
                         }
-                        classInfo.Name = (classInfo.BaseClass == 0 ? "_程序集" : "_类") + (classInfo.Id & EplSystemId.Mask_Num).ToString("X");
+                        classInfo.Name = $"{(classInfo.BaseClass == 0 ? "_程序集" : "_类")}{classInfo.Id & EplSystemId.Mask_Num:X}";
                     }
                     else
                     {
@@ -39,8 +45,8 @@ namespace InjectedEComRepair
                 }
                 FixVariablesName(classInfo.Variables, classInfo.BaseClass == 0 ? "_程序集变量" : "_成员");
             }
-            FixVariablesName(file.Code.GlobalVariables, "_全局");
-            foreach (var method in file.Code.Methods)
+            FixVariablesName(code.GlobalVariables, "_全局");
+            foreach (var method in code.Methods)
             {
                 if (!ValidEplName(method.Name))
                 {
@@ -51,7 +57,7 @@ namespace InjectedEComRepair
                         {
                             method.Comment = "";
                         }
-                        method.Name = $"_子程序{(method.Id & EplSystemId.Mask_Num).ToString("X")}";
+                        method.Name = $"_子程序{method.Id & EplSystemId.Mask_Num:X}";
                     }
                     else
                     {
@@ -66,11 +72,11 @@ namespace InjectedEComRepair
                 {
                     var codeData = method.CodeData;
 #pragma warning disable CS0612 // 类型或成员已过时
-                    block = CodeDataParser.ParseStatementBlock(method.CodeData.ExpressionData, file.Encoding, out codeData.LineOffest, out codeData.BlockOffest);
+                    block = CodeDataParser.ParseStatementBlock(method.CodeData.ExpressionData, encoding, out codeData.LineOffest, out codeData.BlockOffest);
 #pragma warning restore CS0612 // 类型或成员已过时
                     if (engine == 1)
                     {
-                        codeData = block.ToCodeData(file.Encoding);
+                        codeData = block.ToCodeData(encoding);
                     }
                     method.CodeData = codeData;
                 }
@@ -80,15 +86,15 @@ namespace InjectedEComRepair
                     continue;
                 }
             }
-            foreach (var structInfo in file.Code.Structs)
+            foreach (var structInfo in code.Structs)
             {
                 if (!ValidEplName(structInfo.Name))
                 {
-                    structInfo.Name = $"_结构{(structInfo.Id & EplSystemId.Mask_Num).ToString("X")}";
+                    structInfo.Name = $"_结构{structInfo.Id & EplSystemId.Mask_Num:X}";
                 }
                 FixVariablesName(structInfo.Member, "_成员", false);
             }
-            foreach (var dll in file.Code.DllDeclares)
+            foreach (var dll in code.DllDeclares)
             {
                 if (!ValidEplName(dll.Name))
                 {
@@ -102,22 +108,22 @@ namespace InjectedEComRepair
                     {
                         dll.Name = "";
                     }
-                    dll.Name = $"_DLL命令{(dll.Id & EplSystemId.Mask_Num).ToString("X")}{dll.Name}";
+                    dll.Name = $"_DLL命令{dll.Id & EplSystemId.Mask_Num:X}{dll.Name}";
                 }
                 FixVariablesName(dll.Parameters, "_参数", true);
             }
-            foreach (var constant in file.Resource.Constants)
+            foreach (var constant in resource.Constants)
             {
                 if (!ValidEplName(constant.Name))
                 {
-                    constant.Name = constant.Value == null ? "" : $"_常量{(constant.Id & EplSystemId.Mask_Num).ToString("X")}";
+                    constant.Name = constant.Value == null ? "" : $"_常量{constant.Id & EplSystemId.Mask_Num:X}";
                 }
             }
-            foreach (var formInfo in file.Resource.Forms)
+            foreach (var formInfo in resource.Forms)
             {
                 if (!ValidEplName(formInfo.Name))
                 {
-                    formInfo.Name = $"_窗口{(formInfo.Id & EplSystemId.Mask_Num).ToString("X")}";
+                    formInfo.Name = $"_窗口{formInfo.Id & EplSystemId.Mask_Num:X}";
                 }
                 foreach (var elem in formInfo.Elements)
                 {
@@ -132,11 +138,11 @@ namespace InjectedEComRepair
                         {
                             if (ValidEplName("_" + menu.Text))
                             {
-                                menu.Name = $"_菜单{(menu.Id & EplSystemId.Mask_Num).ToString("X")}_{menu.Text}";
+                                menu.Name = $"_菜单{menu.Id & EplSystemId.Mask_Num:X}_{menu.Text}";
                             }
                             else
                             {
-                                menu.Name = $"_菜单{(menu.Id & EplSystemId.Mask_Num).ToString("X")}";
+                                menu.Name = $"_菜单{menu.Id & EplSystemId.Mask_Num:X}";
                             }
                             if (eventMethod != null && eventMethod.Name != null && eventMethod.Name.StartsWith("_") && eventMethod.Name.EndsWith("_被选择"))//尝试从事件子程序名还原名称
                             {
@@ -188,37 +194,37 @@ namespace InjectedEComRepair
                 }
             }
             {
-                var newInitMethod = new List<int>(file.InitEcSectionInfo.InitMethod.Length);
-                var newEcName = new List<string>(file.InitEcSectionInfo.InitMethod.Length);
-                for (int i = 0; i < file.InitEcSectionInfo.InitMethod.Length; i++)
+                var newInitMethod = new List<int>(initECSection.InitMethod.Length);
+                var newECName = new List<string>(initECSection.InitMethod.Length);
+                for (int i = 0; i < initECSection.InitMethod.Length; i++)
                 {
-                    if (!methodIdMap.TryGetValue(file.InitEcSectionInfo.InitMethod[i], out var initMethod))
+                    if (!methodIdMap.TryGetValue(initECSection.InitMethod[i], out var initMethod))
                     {
                         continue;
                     }
                     initMethod.Name = $"初始模块_{i + 1}";
-                    if (ValidEplName("_" + file.InitEcSectionInfo.EcName[i]))
+                    if (ValidEplName("_" + initECSection.ECName[i]))
                     {
-                        initMethod.Name += "_" + file.InitEcSectionInfo.EcName[i];
+                        initMethod.Name += "_" + initECSection.ECName[i];
                     }
 
-                    var prefix = $"[禁止删除][注意：本子程序将自动在启动时被调用，且早于 _启动子程序 被调用][为内联的模块“{file.InitEcSectionInfo.EcName[i]}”做初始化工作]";
+                    var prefix = $"[禁止删除][注意：本子程序将自动在启动时被调用，且早于 _启动子程序 被调用][为内联的模块“{initECSection.ECName[i]}”做初始化工作]";
                     if (!initMethod.Comment.StartsWith(prefix))
                     {
                         initMethod.Comment = $"{prefix}{initMethod.Comment}";
                     }
 
-                    newInitMethod.Add(file.InitEcSectionInfo.InitMethod[i]);
-                    newEcName.Add(i < file.InitEcSectionInfo.EcName.Length ? file.InitEcSectionInfo.EcName[i] : "");
+                    newInitMethod.Add(initECSection.InitMethod[i]);
+                    newECName.Add(i < initECSection.ECName.Length ? initECSection.ECName[i] : "");
                 }
-                file.InitEcSectionInfo.InitMethod = newInitMethod.ToArray();
-                file.InitEcSectionInfo.EcName = newEcName.ToArray();
+                initECSection.InitMethod = newInitMethod.ToArray();
+                initECSection.ECName = newECName.ToArray();
             }
             {
-                if (methodIdMap.TryGetValue(file.Code.MainMethod, out var mainMethod))
+                if (methodIdMap.TryGetValue(code.MainMethod, out var mainMethod))
                 {
                     mainMethod.Name = "_启动子程序";
-                    if (file.InitEcSectionInfo.InitMethod.Length > 0)
+                    if (initECSection.InitMethod.Length > 0)
                     {
                         var prefix = "[注意：本子程序将在 初始模块_X 后调用]";
                         if (!mainMethod.Comment.StartsWith(prefix))
@@ -228,7 +234,7 @@ namespace InjectedEComRepair
                     }
                 }
             }
-            file.Save(target);
+            doc.Save(target);
         }
         private static void FixVariablesName(AbstractVariableInfo[] variables, string prefix, bool useIndexInsteadOfId = false)
         {

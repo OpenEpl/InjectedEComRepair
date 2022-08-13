@@ -92,7 +92,7 @@ namespace InjectedEComRepair
                 {
                     structInfo.Name = $"_结构{structInfo.Id & EplSystemId.Mask_Num:X}";
                 }
-                FixVariablesName(structInfo.Member, "_成员", false);
+                FixVariablesName(structInfo.Members, "_成员", false);
             }
             foreach (var dll in code.DllDeclares)
             {
@@ -236,7 +236,8 @@ namespace InjectedEComRepair
             }
             doc.Save(target);
         }
-        private static void FixVariablesName(AbstractVariableInfo[] variables, string prefix, bool useIndexInsteadOfId = false)
+        private static void FixVariablesName<TElem>(List<TElem> variables, string prefix, bool useIndexInsteadOfId = false)
+            where TElem: AbstractVariableInfo
         {
             int i = 1;
             foreach (var variable in variables)

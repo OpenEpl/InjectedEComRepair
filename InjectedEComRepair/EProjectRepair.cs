@@ -157,7 +157,6 @@ namespace InjectedEComRepair
                     else if (elem is FormControlInfo control)
                     {
                         var elemName = control.Name;
-
                         if (!ValidEplName(elemName))
                         {
                             if (control.Events.Length > 0)//尝试从子程序名恢复窗口名
@@ -165,7 +164,7 @@ namespace InjectedEComRepair
                                 var eventItem = control.Events[0];
                                 if (methodIdMap.TryGetValue(eventItem.Value, out var eventMethod))
                                 {
-                                    var eventName = libNameMap.GetLibTypeName(control.DataType, eventItem.Key);
+                                    var eventName = libNameMap.GetLibTypeEventName(control.DataType, eventItem.Key);
                                     if (eventMethod.Name.StartsWith("_") && eventMethod.Name.EndsWith($"_{eventName}"))
                                     {
                                         formInfo.Name = eventMethod.Name.Substring(1, eventMethod.Name.Length - 1 - eventName.Length - 1);
@@ -178,7 +177,7 @@ namespace InjectedEComRepair
                         {
                             if (methodIdMap.TryGetValue(eventItem.Value, out var eventMethod))
                             {
-                                var eventName = libNameMap.GetLibTypeName(control.DataType, eventItem.Key);
+                                var eventName = libNameMap.GetLibTypeEventName(control.DataType, eventItem.Key);
                                 eventMethod.Name = $"_{elemName}_{eventName}";
                             }
                         }

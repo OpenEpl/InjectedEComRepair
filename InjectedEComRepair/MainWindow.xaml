@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         xmlns:local="clr-namespace:InjectedEComRepair"
         mc:Ignorable="d"
         Title="MainWindow" Height="600" Width="800" AllowDrop="True" Drop="Window_Drop">
@@ -59,14 +60,21 @@
             <Button x:Name="SelectFileButton" DockPanel.Dock="Right" Click="SelectFileButton_Click">...</Button>
             <TextBox x:Name="InputFileTextBox" VerticalContentAlignment="Center">D:\1.e</TextBox>
         </DockPanel>
-        <TextBox x:Name="OutputTextBox"
-                 IsReadOnly="True" 
-                 TextWrapping="Wrap" 
-                 AcceptsReturn="True"
-                 VerticalScrollBarVisibility="Visible"
-                 HorizontalScrollBarVisibility="Visible"
-                 Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
-                 Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
-                 PreviewDragOver="OutputTextBox_PreviewDragOver"/>
+        <avalonEdit:TextEditor x:Name="OutputTextBox"
+                               IsReadOnly="True"
+                               ShowLineNumbers="True"
+                               FlowDirection="LeftToRight"
+                               WordWrap="True"
+                               Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" 
+                               Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                               PreviewDragOver="OutputTextBox_PreviewDragOver">
+            <avalonEdit:TextEditor.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="Copy" />
+                    <Separator />
+                    <MenuItem Command="SelectAll" />
+                </ContextMenu>
+            </avalonEdit:TextEditor.ContextMenu>
+        </avalonEdit:TextEditor>
     </DockPanel>
 </Window>

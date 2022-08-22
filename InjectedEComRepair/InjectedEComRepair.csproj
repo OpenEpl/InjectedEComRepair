@@ -10,7 +10,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <ApplicationIcon>vs.ico</ApplicationIcon>
-    <Copyright>Copyright © 2019 - 2020 QIQI</Copyright>
+    <Copyright>Copyright © 2019 - 2022 OpenEpl</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

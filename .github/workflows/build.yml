@@ -14,16 +14,24 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 3.1.101
+          dotnet-version: 3.1.x
       - name: Install dependencies
         run: dotnet restore
       - name: Build
         run: dotnet build --configuration Release --no-restore
-      - name: Package
+      - name: Package (win-x64)
         run: |
-          dotnet publish --configuration Release --framework netcoreapp3.1 -p:PublishProfile=Properties/PublishProfiles/netcoreapp3.1.pubxml
-      - name: Upload the package built on netcoreapp3.1 framework
+          dotnet publish --configuration Release --framework netcoreapp3.1 -p:PublishProfile=Properties/PublishProfiles/netcoreapp3.1-win-x64.pubxml
+      - name: Upload (win-x64)
         uses: actions/upload-artifact@v2
         with:
-          name: netcoreapp3.1
-          path: InjectedEComRepair/publish/netcoreapp3.1
+          name: netcoreapp3.1-win-x64
+          path: InjectedEComRepair/publish/netcoreapp3.1-win-x64
+      - name: Package (win-x86)
+        run: |
+          dotnet publish --configuration Release --framework netcoreapp3.1 -p:PublishProfile=Properties/PublishProfiles/netcoreapp3.1-win-x86.pubxml
+      - name: Upload (win-x86)
+        uses: actions/upload-artifact@v2
+        with:
+          name: netcoreapp3.1-win-x86
+          path: InjectedEComRepair/publish/netcoreapp3.1-win-x86

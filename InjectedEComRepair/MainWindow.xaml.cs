@@ -1,11 +1,12 @@
-﻿using Newtonsoft.Json;
-using QIQI.EProjectFile;
+﻿using QIQI.EProjectFile;
 using QIQI.EProjectFile.Sections;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -63,7 +64,11 @@ namespace InjectedEComRepair
                     var resourceSection = doc.Get(ResourceSection.Key);
                     if (outputSectionData)
                     {
-                        output.AppendLine(JsonConvert.SerializeObject(doc.Sections, Formatting.Indented));
+                        output.AppendLine(JsonSerializer.Serialize(doc.Sections, new JsonSerializerOptions()
+                        {
+                            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                            WriteIndented = true
+                        }));
                     }
                     if (parseCodeData)
                     {

@@ -11,6 +11,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <ApplicationIcon>vs.ico</ApplicationIcon>
     <Copyright>Copyright © 2019 - 2022 OpenEpl</Copyright>
+    <RollForward>Major</RollForward>
   </PropertyGroup>
 
   <ItemGroup>
